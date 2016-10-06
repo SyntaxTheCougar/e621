@@ -10,7 +10,7 @@ DOWN = -1
 def vote()
 	for post in post_list:
 		id_n = post['id']
-		params={'id': id_n, 'score' , 'name': username, 'password': password, }
+		params={'id': id_n, 'score' , 'name': username, 'password': password }
 
 
 

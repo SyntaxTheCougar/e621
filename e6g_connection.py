@@ -7,6 +7,7 @@ import datetime
 from threading import Thread
 
 class DataRetriever :
+	BASE_URL =  "https://e621.net/" 
 	
 	def __init__(self):
 		self.jsonData = {}
@@ -14,13 +15,16 @@ class DataRetriever :
 	
 	def buildQuery(self, controller, action, params):
 		url = "https://e621.net/" + controller + "/" + action + ".json?"
+		
+		if not params:
+			return url
 
 		for key,value in params.iteritems(): 
 			url += key + "=" + str(value)
 			url += "&"  
 	
 		url = url[:-1]	
-		return url; 
+		return url
 
 	def getPostsForTag(self, tagname):
 		params = {'limit': 320, 'tags' : tagname}
@@ -32,7 +36,7 @@ class DataRetriever :
 		while True:
 			fullURL =  url + page + str(page_num)
 			print "Getting page " + str(page_num) + " for " + tagname
-
+			print "URL: " + fullURL
 			parsed = self.jsonFromURL(fullURL)
 			post_list = post_list + parsed
 	
@@ -49,11 +53,21 @@ class DataRetriever :
 		return post_list 
 
 	def jsonFromURL(self, url):
-		response = urllib2.urlopen(url)
+		req = urllib2.Request(url, headers={'User-Agent' : "Magic Browser"}) 
+		response = urllib2.urlopen(req)
 		json_data = response.read()
 		parsedJson = json.loads(json_data)
 		return parsedJson
 
+	def getFirstPage(self):
+		url = self.buildQuery("post", "index", None)
+		return self.jsonFromURL(url)
+		
+	def getFirstN(self, num):
+		params = {'limit': num}
+		url = self.buildQuery("post", "index", params)
+		return self.jsonFromURL(url)
+		
 	def downloadInParallel(self, tags):
 		threads = [] 
 		for tag in tags:
@@ -69,7 +83,3 @@ class DataRetriever :
 		print "Complete!"
 		return self.jsonData 
 
-
-
-#plot_url = py.plot(plot_data, filename='undertale-posts-per-day')
-#print plot_url
